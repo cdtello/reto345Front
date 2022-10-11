@@ -1,72 +1,147 @@
 var selectedRow = null
 
-function onFormSubmit(e) {
+
+
+//*******    CRUD  CATEGORY     *******/ 
+
+function onCategorySubmit(e) {
 	event.preventDefault();
-        var formData = readFormData();
-        if (selectedRow == null){
-            insertNewRecord(formData);
-		}
-        else{
-            updateRecord(formData);
-		}
-        resetForm();    
+        const formData = readFormCategoryData();
+        createCategory(formData);
+        resetFormCategory();    
 }
 
 //Retrieve the data
-function readFormData() {
+function readFormCategoryData() {
     var formData = {};
-    formData["productCode"] = document.getElementById("productCode").value;
-    formData["product"] = document.getElementById("product").value;
-    formData["qty"] = document.getElementById("qty").value;
-    formData["perPrice"] = document.getElementById("perPrice").value;
+    formData["name"] = document.getElementById("categoryName").value;
+    formData["description"] = document.getElementById("categoryDescription").value;
     return formData;
 }
 
-//Insert the data
-function insertNewRecord(data) {
-    var table = document.getElementById("storeList").getElementsByTagName('tbody')[0];
-    var newRow = table.insertRow(table.length);
-    cell1 = newRow.insertCell(0);
-		cell1.innerHTML = data.productCode;
-    cell2 = newRow.insertCell(1);
-		cell2.innerHTML = data.product;
-    cell3 = newRow.insertCell(2);
-		cell3.innerHTML = data.qty;
-    cell4 = newRow.insertCell(3);
-		cell4.innerHTML = data.perPrice;
-    cell4 = newRow.insertCell(4);
-        cell4.innerHTML = `<button onClick="onEdit(this)">Edit</button> <button onClick="onDelete(this)">Delete</button>`;
+function createCategory(data) {
+    $.ajax({
+        url : `http://129.158.60.253:8080/api/Category/save`,
+        data : data,
+        type : "POST", //POST, PUT, DELETE
+        dataType : 'json',
+        success: function() {
+            console.log('insertOK');
+        },
+        error: function(error) {
+            console.log('errorInsert -->', error);
+        },
+        complete : function(xhr, status) {
+            //location.reload();
+            loadData();
+        }
+    })
 }
 
+
+//Load data
+function loadData(){
+    const table = document.getElementById("categoryList").getElementsByTagName('tbody')[0];
+    $.ajax({
+        url : `http://129.158.60.253:8080/api/Category/all`,
+        data : null,
+        type : "GET", //POST, PUT, DELETE, GET
+        dataType : 'json',
+        success: function(data) {
+            data.items.map(item => {
+                const newRow = table.insertRow();
+                cell1 = newRow.insertCell(0);
+                    cell1.innerHTML = item.id;
+                cell2 = newRow.insertCell(1);
+                    cell2.innerHTML = item.name;
+                cell3 = newRow.insertCell(2);
+                    cell3.innerHTML = item.description;
+                cell4 = newRow.insertCell(4);
+                    cell4.innerHTML = `<button onClick="onSelect(this)">Select</button> <button onClick="onDelete(this,${item.id})">Delete</button>`;
+            })
+        },
+        error: function(error) {
+            alert('Error');
+            console.log('errorLoad -->', error);
+        },
+        complete : function(xhr, status) {
+            console.log('load OK');
+        }
+    })
+    
+}
+loadData();
+//Insert the data
+
+
 //Edit the data
-function onEdit(td) {
+function onSelect(td) {
     selectedRow = td.parentElement.parentElement;
     document.getElementById("productCode").value = selectedRow.cells[0].innerHTML;
     document.getElementById("product").value = selectedRow.cells[1].innerHTML;
     document.getElementById("qty").value = selectedRow.cells[2].innerHTML;
     document.getElementById("perPrice").value = selectedRow.cells[3].innerHTML;
 }
-function updateRecord(formData) {
-    selectedRow.cells[0].innerHTML = formData.productCode;
-    selectedRow.cells[1].innerHTML = formData.product;
-    selectedRow.cells[2].innerHTML = formData.qty;
-    selectedRow.cells[3].innerHTML = formData.perPrice;
+function updateRecord() {
+     fetch(url, {
+        method: 'PUT', // *GET, POST, PUT, DELETE, etc.
+        body: JSON.stringify(data) // body data type must match "Content-Type" header
+    }).then(data => data.json())
+    .then(response => renderPokemonData(response))
+    .catch(err => renderNotFound())
+
+
+    const formData = readFormData();
+    console.log('formData ->', formData)
+    const data = {nombre: formData.nombre, apellido: formData.apellido, edad: formData.edad}
+    $.ajax({
+        url : `https://g21b567102d46a9-f8e2c8h6ah6jkxtz.adb.us-ashburn-1.oraclecloudapps.com/ords/admin/estudiantes/estudiantes/${formData.id}`,
+        data : data,
+        type : "PUT", //POST, PUT, DELETE
+        dataType : 'json',
+        success: function() {
+            
+            console.log('insertOK');
+        },
+        error: function(error) {
+            console.log('errorInsert -->', error);
+        },
+        complete : function(xhr, status) {
+            //location.reload();
+            loadData();
+        }
+    })
 }
 
 //Delete the data
-function onDelete(td) {
+function onDelete(td, id) {
+    $.ajax({
+        url : `https://g21b567102d46a9-f8e2c8h6ah6jkxtz.adb.us-ashburn-1.oraclecloudapps.com/ords/admin/estudiantes/estudiantes/${id}`,
+        data : null,
+        type : "DELETE", //POST, PUT, DELETE,
+        dataType : 'json',
+        success: function(data) {
+            console.log('Eliminado -->', data);
+        },
+        error: function(error) {
+            alert('Error');
+            console.log('errorDelete -->', error);
+        },
+        complete : function(xhr, status) {
+            alert('Petición realizada');
+        }
+    })
     if (confirm('Do you want to delete this record?')) {
         row = td.parentElement.parentElement;
         document.getElementById('storeList').deleteRow(row.rowIndex);
-        resetForm();
+        resetFormCategory();
     }
 }
 
 //Reset the data
-function resetForm() {
-    document.getElementById("productCode").value = '';
-    document.getElementById("product").value = '';
-    document.getElementById("qty").value = '';
-    document.getElementById("perPrice").value = '';
+function resetFormCategory() {
+    document.getElementById("categoryId").value = '';
+    document.getElementById("categoryName").value = '';
+    document.getElementById("categoryDescription").value = '';
     selectedRow = null;
 }
