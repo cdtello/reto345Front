@@ -144,7 +144,7 @@ function categoryDelete(td, id) {
     })
     if (confirm('Do you want to delete this record?')) {
         row = td.parentElement.parentElement;
-        document.getElementById('storeList').deleteRow(row.rowIndex);
+        document.getElementById('categoryList').deleteRow(row.rowIndex);
         resetFormCategory();
     }
 }
