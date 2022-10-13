@@ -3,7 +3,9 @@ var selectedRow = null
 const host = '129.158.60.253';
 //const host = 'localhost';
 
+//*******   *******    *******  *******/ 
 //*******    CRUD  CATEGORY     *******/ 
+//*******   *******    *******  *******/ 
 
 function onCategorySubmit(e) {
 	event.preventDefault();
